@@ -30,8 +30,8 @@
 
 const CONFIG = {
     endpoint: 'https://script.google.com/macros/s/AKfycbwlcZHVPw2otsY2l0TY-cCMEjt9EKEtY9_roUT0a5Owpr83FaspcHB3e_VbJnSG4BKC/exec',
-    oneSubmission: true,
-    doneKey: 'ccs_survey_submitted_v1',
+     maxSubmissions: 1,            // 0 = unlimited (toggle off), 1 = once, 3 = three times...
+    countKey: 'ccs_survey_count_v1',
     themeKey: 'ccs_survey_theme',
     backupKey: 'ccs_survey_backup'
 };
@@ -245,14 +245,23 @@ function setTheme(t) {
     store(CONFIG.themeKey, t);
 }
 
-/* ---- one submission per device (CONFIG.oneSubmission) ---- */
-const alreadyDone = () => CONFIG.oneSubmission &&
-    (load(CONFIG.doneKey) || document.cookie.includes(CONFIG.doneKey + '=1'));
-const markDone = () => {
-    if (!CONFIG.oneSubmission) return;
-    store(CONFIG.doneKey, '1');
-    document.cookie = CONFIG.doneKey + '=1; max-age=31536000; path=/; SameSite=Lax';
+/* ---- submission limit per device (CONFIG.maxSubmissions, 0 = unlimited) ---- */
+const getCount = () => {
+    const ls = parseInt(load(CONFIG.countKey), 10) || 0;
+    const m = document.cookie.match(new RegExp(CONFIG.countKey + '=(\\d+)'));
+    return Math.max(ls, m ? +m[1] : 0);
 };
+const limitReached = () => CONFIG.maxSubmissions > 0 && getCount() >= CONFIG.maxSubmissions;
+const markDone = () => {
+    const n = getCount() + 1;
+    store(CONFIG.countKey, String(n));
+    document.cookie = `${CONFIG.countKey}=${n}; max-age=31536000; path=/; SameSite=Lax`;
+};
+const limitText = () => CONFIG.maxSubmissions === 1
+    ? 'You can take this survey only once.'
+    : `You can take this survey only ${CONFIG.maxSubmissions} times.`;
+
+
 
 /* ---- step navigation (supports skipped sections) ---- */
 const isSkipped = i => !!(STEPS[i].skip && STEPS[i].skip(S.a));
@@ -307,10 +316,15 @@ function render() {
             <p>Organized by the Students' Rights and Welfare (STRAW) Committee. </p><p>Your answers are anonymous, handled under the Data Privacy Act of 2012, and used only to guide Student Council initiatives.</p>
             <div class="actions" style="justify-content:center"><button class="btn" data-go="survey">Let's take on the survey</button></div></div></section>`;
     else if (S.screen === 'survey') renderStep();
+    else if (S.screen === 'blocked') app.innerHTML = `<section class="screen"><div class="moon"></div>
+        <h1>${limitText()}</h1><h2 class="bold-body">Thanks for howling with us, Pack!</h2>
+        <p class="muted note">Your earlier response has already been recorded.</p></section>`;
     else app.innerHTML = `<section class="screen"><div class="moon"></div>
-            <h1>Thank you for participating in the survey</h1><h2 class="bold-body">Let's keep on howling, Pack!</h2>
-            <p class="muted note">Your submission helps the CCS Student Council understand student concerns and improve services, programs, and student representation. All responses will be reviewed carefully and may help guide future actions and initiatives.</p>
-            ${S.msg?`<p class="muted note">${esc(S.msg)}</p>`:''}</section>`;
+        <h1>Thank you for participating in the survey</h1><h2 class="bold-body">Let's keep on howling, Pack!</h2>
+        <p class="muted note">Your submission helps the CCS Student Council understand student concerns and improve services, programs, and student representation. All responses will be reviewed carefully and may help guide future actions and initiatives.</p>
+        ${S.msg?`<p class="muted note">${esc(S.msg)}</p>`:''}</section>`;
+
+
     window.scrollTo(0, 0);
 }
 
@@ -386,9 +400,8 @@ function advance() {
 }
 
 async function submit() {
-    if (alreadyDone()) {
-        S.msg = 'A response has already been submitted from this device.';
-        S.screen = 'done';
+    if (limitReached()) {
+        S.screen = 'blocked';
         return render();
     }
     const data = { submitted_at: new Date().toISOString() };
@@ -484,4 +497,5 @@ app.addEventListener('input', e => {
 
 const saved = load(CONFIG.themeKey);
 if (saved) document.documentElement.dataset.theme = saved;
+if (limitReached()) S.screen = 'blocked';
 render();
