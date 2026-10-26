@@ -30,7 +30,7 @@
 
 const CONFIG = {
     endpoint: 'https://script.google.com/macros/s/AKfycbwlcZHVPw2otsY2l0TY-cCMEjt9EKEtY9_roUT0a5Owpr83FaspcHB3e_VbJnSG4BKC/exec',
-    oneSubmission: false,
+    oneSubmission: true,
     doneKey: 'ccs_survey_submitted_v1',
     themeKey: 'ccs_survey_theme',
     backupKey: 'ccs_survey_backup'
