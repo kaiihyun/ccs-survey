@@ -30,7 +30,7 @@
 
 const CONFIG = {
     endpoint: 'https://script.google.com/macros/s/AKfycbwlcZHVPw2otsY2l0TY-cCMEjt9EKEtY9_roUT0a5Owpr83FaspcHB3e_VbJnSG4BKC/exec',
-     maxSubmissions: 1,            // 0 = unlimited (toggle off), 1 = once, 3 = three times...
+    maxSubmissions: 0,            // 0 = unlimited (toggle off), 1 = once, 3 = three times...
     countKey: 'ccs_survey_count_v1',
     themeKey: 'ccs_survey_theme',
     backupKey: 'ccs_survey_backup'
@@ -155,11 +155,11 @@ const STEPS = [
                 options: [
                     { v: '#official-announcements', t: '#official-announcements' },
                     { v: '#academic-help-and-resources', t: '#academic-help-and-resources' },
-                    { v: '#year-level-channels', t: '#year-level-channels', sub: 'Class-specific discussions and updates' },
+                    { v: '#year-level-channels', t: '#year-level-channels' },
                     { v: '#career-and-internships', t: '#career-and-internships', sub: 'Job openings, seminars, tech opportunities' },
-                    { v: '#gaming-and-recreation', t: '#gaming-and-recreation', sub: 'Esports, casual gaming, organization lounges' },
+                    { v: '#gaming-and-recreation', t: '#gaming-and-recreation', sub: 'Esports, casual gaming lounge' },
                     { v: '#tech-and-projects', t: '#tech-and-projects', sub: 'Student projects, open-source collaboration' },
-                    { v: '#helpdesk-and-concerns', t: '#helpdesk-and-concerns', sub: 'Ticket system to raise welfare concerns to STRAW' }
+                    { v: '#helpdesk-and-concerns', t: '#helpdesk-and-concerns', sub: 'Raise welfare concerns to STRAW' }
                 ]
             },
             {
@@ -168,23 +168,7 @@ const STEPS = [
                 type: 'radio',
                 min: '120px',
                 options: ['Very likely', 'Likely', 'Unlikely', 'Not at all']
-            },
-             {
-
-                id: 'eaten_already',
-                label: 'Kumain Ka Na Ba? Eaten Already???',
-                type: 'radio',
-                min: '210px',
-                options: ['Yes', 'No']
-            },
-            {
-
-                id: 'sino',
-                label: 'Kinsa imong pilion',
-                type: 'radio',
-                min: '210px',
-                options: ['Ako', 'Imong Ex', 'Siya', 'Og ako nlng diay...']
-            }
+            }   
         ]
     },
 
